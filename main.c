@@ -56,7 +56,7 @@ void GameBoard_delete(GameBoard *board) {
  *
  * 0 + 3 3 3 3 3 3 +
  *   0             0
- *   + 3 3 3 3 3 3 + 1
+ *   + 3 3 3 3 3 3 + 1  0 to play.
  *
  * The top lane is player 0's lane from left to right.
  * The store on the right side of the board is then player 0's.
@@ -81,7 +81,13 @@ void GameBoard_print(GameBoard *board) {
     for (int i = board->length - 2; i >= 0; i--) {
         printf(" %d", board->lanes[1][i]);
     }
-    printf(" + 1\t%d to play.\n", board->turn);
+    printf(" + 1");
+
+    if (GameBoard_is_game_over(board)) {
+        printf("\t%d won.\n", GameBoard_winner_is(board));
+    } else {
+        printf("\t%d to play.\n", board->turn);
+    }
 
 }
 
@@ -167,6 +173,46 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
     }
 
     return board->turn;
+
+}
+
+/**
+ * Returns 1 if the game is over or 0 if not.
+ *
+ * A game is over when the player to play has no seeds in their lane.
+ * The winner is whichever player has more seeds in their store at this time.
+ */
+int GameBoard_is_game_over(GameBoard *board) {
+
+    int *lane = board->lanes[board->turn];
+
+    for (int i = 0; i < board->length; i++) {
+        if (lane[i] > 0) {
+            return 0;
+        }
+    }
+
+    return 1;
+
+}
+
+/**
+ * Returns which player has more seeds in their store or -1 in a tie.
+ */
+int GameBoard_winner_is(GameBoard *board) {
+
+    if (board->stores[0] > board->stores[1]) {
+        // Player 0 won.
+        return 0;
+    }
+
+    if (board->stores[0] == board->stores[1]) {
+        // Tie.
+        return -1;
+    }
+
+    // Player 1 won.
+    return 1;
 
 }
 
