@@ -76,8 +76,7 @@ void GameBoard_print(GameBoard *board) {
     printf(" +\n");
 
     // Print stores.
-    printf("  %d           ", board->stores[1]);
-    printf("  %d\n", board->stores[0]);
+    printf("  %d%*c%d\n", board->stores[1], board->length * 2 + 1, ' ', board->stores[0]);
 
     // Print last lane.
     printf("  + %d", board->lanes[1][board->length - 1]);
