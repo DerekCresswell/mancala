@@ -105,6 +105,8 @@ void GameBoard_print(GameBoard *board) {
  *    pit is non empty, the seeds in both of these pits are captured for the player.
  *
  * Returns the next player to play.
+ *
+ * Assumes the input is a valid play (see `_is_valid_play`).
  */
 int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
 
@@ -181,6 +183,21 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
 }
 
 /**
+ * Checks if the suggested play is a valid turn.
+ */
+int GameBoard_is_valid_play(GameBoard *board, int pit_to_play) {
+
+    // Check that the pit is a valid index.
+    int valid_index = pit_to_play >= 0 && pit_to_play < board->length;
+
+    // Check that the pit has a non-zero number of seeds.
+    int valid_pit = board->lanes[board->turn][pit_to_play] > 0;
+
+    return valid_index && valid_pit;
+
+}
+
+/**
  * Returns 1 if the game is over or 0 if not.
  *
  * A game is over when either player has no seeds in their lane.
@@ -242,10 +259,14 @@ void run_console_game(int board_length, int starting_seeds) {
     while (!GameBoard_is_game_over(board)) {
 
         int current_turn = board->turn;
-        int pit_to_play = -1;
-
         printf("Player %d's turn: ", current_turn);
+
+        int pit_to_play = -1;
         scanf("%d", &pit_to_play);
+        while (!GameBoard_is_valid_play(board, pit_to_play)) {
+            printf("Invalid play. Try again: ");
+            scanf("%d", &pit_to_play);
+        }
 
         GameBoard_play_turn(board, pit_to_play);
 
