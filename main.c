@@ -13,6 +13,9 @@ typedef struct {
 
 } GameBoard;
 
+int GameBoard_is_game_over(GameBoard *board);
+int GameBoard_winner_is(GameBoard *board);
+
 GameBoard *GameBoard_create(int length, int starting_seeds) {
 
     GameBoard *board = malloc(sizeof(GameBoard));
@@ -157,15 +160,16 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
 
     if (current_turn == starting_turn && pit_to_play > 0) {
 
-        int landed_in_pit = pit_to_play - 1;
+        int landed_in_pit_index = pit_to_play - 1;
+        int landed_in_pit = playing_lane[landed_in_pit_index];
         int opponents_turn = (starting_turn + 1) % 2;
-        int adjacent_pit_index = board->length - landed_in_pit - 1;
+        int adjacent_pit_index = board->length - landed_in_pit_index - 1;
         int adjacent_pit = board->lanes[opponents_turn][adjacent_pit_index];
 
-        if (adjacent_pit > 0) {
+        if (adjacent_pit > 0 && landed_in_pit == 1) {
 
             board->lanes[opponents_turn][adjacent_pit_index] = 0;
-            playing_lane[landed_in_pit] = 0;
+            playing_lane[landed_in_pit_index] = 0;
             (*playing_store) += adjacent_pit + 1;
 
         }
@@ -179,20 +183,25 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
 /**
  * Returns 1 if the game is over or 0 if not.
  *
- * A game is over when the player to play has no seeds in their lane.
+ * A game is over when either player has no seeds in their lane.
  * The winner is whichever player has more seeds in their store at this time.
  */
 int GameBoard_is_game_over(GameBoard *board) {
 
-    int *lane = board->lanes[board->turn];
+    int *lane_0 = board->lanes[0];
+    int *lane_1 = board->lanes[1];
+
+    int lane_0_empty = 1;
+    int lane_1_empty = 1;
 
     for (int i = 0; i < board->length; i++) {
-        if (lane[i] > 0) {
-            return 0;
-        }
+
+        lane_0_empty &= (lane_0[i] == 0);
+        lane_1_empty &= (lane_1[i] == 0);
+
     }
 
-    return 1;
+    return lane_0_empty || lane_1_empty;
 
 }
 
@@ -216,35 +225,54 @@ int GameBoard_winner_is(GameBoard *board) {
 
 }
 
-int main(int argc, char** argv) {
+/* --- */
 
-    int board_length = 6;
-    int starting_seeds = 3;
+void run_console_game(int board_length, int starting_seeds) {
 
     // Initialize a game of mancala.
     GameBoard *board = GameBoard_create(board_length, starting_seeds);
     if (board == NULL) {
-        return 1;
+        return;
     }
 
     // Run main game loop.
     GameBoard_print(board);
     printf("\n");
 
-    GameBoard_play_turn(board, 5);
-    GameBoard_print(board);
-    printf("\n");
+    while (!GameBoard_is_game_over(board)) {
 
-    GameBoard_play_turn(board, 5);
-    GameBoard_print(board);
-    printf("\n");
+        int current_turn = board->turn;
+        int pit_to_play = -1;
 
-    GameBoard_play_turn(board, 2);
-    GameBoard_print(board);
-    printf("\n");
+        printf("Player %d's turn: ", current_turn);
+        scanf("%d", &pit_to_play);
+
+        GameBoard_play_turn(board, pit_to_play);
+
+        GameBoard_print(board);
+        printf("\n");
+
+    }
+
+    int winner = GameBoard_winner_is(board);
+    if (winner == -1) {
+        printf("\nThe game is a draw!\n");
+    } else {
+        printf("\nPlayer %d has won!\n", winner);
+    }
 
     // Clean up and exit.
     GameBoard_delete(board);
+
+}
+
+int main(int argc, char** argv) {
+
+    int board_length = 6;
+    int starting_seeds = 3;
+
+    run_console_game(board_length, starting_seeds);
+
     return 0;
 
 }
