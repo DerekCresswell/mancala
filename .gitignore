@@ -1,4 +1,6 @@
 *.o
 mancala
 main
+
 build/
+.vscode/

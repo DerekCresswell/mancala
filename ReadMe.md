@@ -19,3 +19,7 @@ I will be following a three phase structure to it's implementation:
 
 I will be adding some of my results here when they are more complete.
 
+## Building
+
+This project is going to be kept small and simple.
+A basic `Makefile` is provided with which you can simply run `make` in the current directory to build the `mancala` executable.
