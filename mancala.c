@@ -33,6 +33,29 @@ GameBoard *GameBoard_create(int length, int starting_seeds) {
 
 }
 
+GameBoard *GameBoard_copy(GameBoard *board) {
+
+    GameBoard *new_board = GameBoard_create(board->length, 0);
+
+    // Copy the stores.
+    new_board->stores[0] = board->stores[0];
+    new_board->stores[1] = board->stores[1];
+
+    // Copy the turn.
+    new_board->turn = board->turn;
+
+    // Copy the lanes.
+    for (int i = 0; i < board->length; i++) {
+
+        new_board->lanes[0][i] = board->lanes[0][i];
+        new_board->lanes[1][i] = board->lanes[1][i];
+
+    }
+
+    return new_board;
+
+}
+
 void GameBoard_delete(GameBoard *board) {
 
     free(board->lanes[0]);

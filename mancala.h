@@ -13,6 +13,7 @@ typedef struct {
  * Allocates and deallocates resources for a game of Mancala.
  */
 GameBoard *GameBoard_create(int length, int starting_seeds);
+GameBoard *GameBoard_copy(GameBoard *board);
 void GameBoard_delete(GameBoard *board);
 
 /**
