@@ -8,12 +8,18 @@ typedef struct _Node {
 
 } Node;
 
+/**
+ * Cleans up successor nodes.
+ */
+void Node_cleanup(Node *node, void (*free_state) (void *state));
+
 typedef struct {
 
     int (*utility) (void *state);
     int (*is_terminal) (void *state);
     int (*get_turn) (void *state);
     int (*get_successors) (void *state, void ***successors);
+    void (*free_state) (void *state);
 
     // Stats.
     int nodes_generated;

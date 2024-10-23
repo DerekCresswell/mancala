@@ -4,6 +4,17 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+void Node_cleanup(Node *node, void (*free_state) (void *state)) {
+
+    for (int i = 0; i < node->number_successors; i++) {
+        Node_cleanup(node->successors + i, free_state);
+    }
+
+    free_state(node->game_state);
+    free(node->successors);
+
+}
+
 int _max(int a, int b) {
     if (a > b) {
         return a;
