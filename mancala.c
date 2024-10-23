@@ -261,3 +261,23 @@ int GameBoard_get_successors(GameBoard *board, GameBoard ***successors) {
     return number_valid_pits;
 
 }
+
+int GameBoard_utility(GameBoard *board) {
+
+    if (GameBoard_is_game_over(board)) {
+
+        int winner = GameBoard_winner_is(board);
+
+        // TODO: Return a gaurenteed win.
+        return (winner == board->turn) * 1000;
+
+    }
+
+    // Return the advantage we hold in terms of score.
+    return board->stores[board->turn] - board->stores[(board->turn + 1) % 2];
+
+}
+
+int GameBoard_current_turn(GameBoard *board) {
+    return board->turn;
+}

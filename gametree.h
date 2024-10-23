@@ -27,6 +27,8 @@ typedef struct {
 
 } MinMaxSearch;
 
+void MinMaxSearch_print_stats(MinMaxSearch *search);
+
 /**
  * Returns the successor node of root that will yield the maximal return.
  * Only explores up to depth nodes deep.

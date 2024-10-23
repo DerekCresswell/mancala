@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void Node_cleanup(Node *node, void (*free_state) (void *state)) {
 
@@ -13,6 +14,10 @@ void Node_cleanup(Node *node, void (*free_state) (void *state)) {
     free_state(node->game_state);
     free(node->successors);
 
+}
+
+void MinMaxSearch_print_stats(MinMaxSearch *search) {
+    printf("Nodes generated: %d\tNodes explored: %d\n", search->nodes_generated, search->nodes_explored);
 }
 
 int _max(int a, int b) {
@@ -107,8 +112,8 @@ int MinMaxSearch_generate_successor_nodes(MinMaxSearch *search, Node *root) {
     for (int i = 0; i < number_successors; i++) {
 
         root->successors[i].game_state = successors[i];
-        root->number_successors = -1;
-        root->successors = NULL;
+        root->successors[i].number_successors = -1;
+        root->successors[i].successors = NULL;
 
     }
 

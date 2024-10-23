@@ -77,3 +77,13 @@ int GameBoard_score_of(GameBoard *board, int player);
  * It is responsibility of the caller to free all of this.
  */
 int GameBoard_get_successors(GameBoard *board, GameBoard ***successors);
+
+/**
+ * Returns the utility for the current player.
+ */
+int GameBoard_utility(GameBoard *board);
+
+/**
+ * Returns the current player;
+ */
+int GameBoard_current_turn(GameBoard *board);
