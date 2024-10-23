@@ -11,7 +11,10 @@ void Node_cleanup(Node *node, void (*free_state) (void *state)) {
         Node_cleanup(node->successors + i, free_state);
     }
 
-    free_state(node->game_state);
+    if (node->game_state) {
+        free_state(node->game_state);
+    }
+
     free(node->successors);
 
 }
@@ -74,7 +77,7 @@ int _MinMaxSearch_search_inner(MinMaxSearch *search, Node *root, int max_player,
 
 }
 
-Node *MinMaxSearch_search(MinMaxSearch *search, Node *root, int depth) {
+Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
 
     // We must generate the successors of the root node and run our search on it.
     // This assumes we are not at a terminal node.
@@ -87,7 +90,7 @@ Node *MinMaxSearch_search(MinMaxSearch *search, Node *root, int depth) {
     int highest_utility = -1;
     for (int i = 0; i < number_successors; i++) {
 
-        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, depth - 1);
+        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, search->depth - 1);
 
         if (utility > highest_utility) {
             highest_utility = utility;

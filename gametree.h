@@ -15,6 +15,8 @@ void Node_cleanup(Node *node, void (*free_state) (void *state));
 
 typedef struct {
 
+    int depth;
+
     int (*utility) (void *state);
     int (*is_terminal) (void *state);
     int (*get_turn) (void *state);
@@ -31,9 +33,9 @@ void MinMaxSearch_print_stats(MinMaxSearch *search);
 
 /**
  * Returns the successor node of root that will yield the maximal return.
- * Only explores up to depth nodes deep.
+ * Only explores up to search.depth nodes deep.
  */
-Node *MinMaxSearch_search(MinMaxSearch *search, Node *root, int depth);
+Node *MinMaxSearch_search(MinMaxSearch *search, Node *root);
 
 /**
  * Generates the successors for the root node.

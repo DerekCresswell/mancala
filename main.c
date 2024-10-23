@@ -57,6 +57,16 @@ void run_pvc_console_game(int board_length, int starting_seeds) {
         return;
     }
 
+    // Initialize our search tree;
+    MinMaxSearch search;
+    search.depth = 3;
+
+    search.utility = (int (*) (void *state)) &GameBoard_utility;
+    search.is_terminal = (int (*) (void *state)) &GameBoard_is_game_over;
+    search.get_turn = (int (*) (void *state)) &GameBoard_current_turn;
+    search.get_successors = (int (*) (void *state, void ***successors)) &GameBoard_get_successors;
+    search.free_state = (void (*) (void *state)) &GameBoard_delete;
+
     // Run main game loop.
     GameBoard_print(board);
     printf("\n");
@@ -79,25 +89,22 @@ void run_pvc_console_game(int board_length, int starting_seeds) {
 
         } else {
 
-            MinMaxSearch search;
             MinMaxSearch_reset_stats(&search);
 
-            search.utility = &GameBoard_utility;
-            search.is_terminal = &GameBoard_is_game_over;
-            search.get_turn = &GameBoard_current_turn;
-            search.get_successors = &GameBoard_get_successors;
-            search.free_state = &GameBoard_delete;
+            GameBoard *old_board = board;
 
             Node root;
             root.game_state = board;
 
-            Node *to_play = MinMaxSearch_search(&search, &root, 3);
+            Node *to_play = MinMaxSearch_search(&search, &root);
             MinMaxSearch_print_stats(&search);
 
             // Swap to our new state.
             board = to_play->game_state;
+            to_play->game_state = NULL;
 
-            // TODO: Clean up.
+            // Clean up our search.
+            Node_cleanup(&root, search.free_state);
 
         }
 
