@@ -212,3 +212,38 @@ int GameBoard_winner_is(GameBoard *board) {
     return 1;
 
 }
+
+int GameBoard_get_successors(GameBoard *board, GameBoard ***successors) {
+
+    // First, find which pits we can play from.
+    int *playing_lane = board->lanes[board->turn];
+
+    int number_valid_pits = 0;
+    int valid_pits[board->length];
+    for (int i = 0; i < board->length; i++) {
+        int valid = playing_lane[i] > 0;
+
+        number_valid_pits += valid;
+        valid_pits[i] = valid;
+    }
+
+    // Create a copy of this board and a successor for each possible play.
+    *successors = malloc(sizeof(GameBoard *) * number_valid_pits);
+
+    for (int i = 0, current_play = 0; i < board->length; i++) {
+        if (!valid_pits[i]) {
+            continue;
+        }
+
+        (*successors)[current_play] = GameBoard_copy(board);
+
+        // Play the turn;
+        GameBoard_play_turn((*successors)[current_play], i);
+
+        current_play++;
+
+    }
+
+    return number_valid_pits;
+
+}

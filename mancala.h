@@ -62,3 +62,11 @@ int GameBoard_is_game_over(GameBoard *board);
  * Returns which player has more seeds in their store or -1 in a tie.
  */
 int GameBoard_winner_is(GameBoard *board);
+
+/**
+ * Returns the number of successor states to this one.
+ * The provided pointer will point to the list of these states.
+ *
+ * The list will point to a list of pointers to gameboards.
+ */
+int GameBoard_get_successors(GameBoard *board, GameBoard ***successors);
