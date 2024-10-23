@@ -64,9 +64,16 @@ int GameBoard_is_game_over(GameBoard *board);
 int GameBoard_winner_is(GameBoard *board);
 
 /**
+ * Returns the score for the given player as if the game is over.
+ */
+int GameBoard_score_of(GameBoard *board, int player);
+
+/**
  * Returns the number of successor states to this one.
  * The provided pointer will point to the list of these states.
  *
  * The list will point to a list of pointers to gameboards.
+ * The list will be allocated within this function as well as each new gameboard.
+ * It is responsibility of the caller to free all of this.
  */
 int GameBoard_get_successors(GameBoard *board, GameBoard ***successors);

@@ -198,18 +198,32 @@ int GameBoard_is_game_over(GameBoard *board) {
 
 int GameBoard_winner_is(GameBoard *board) {
 
-    if (board->stores[0] > board->stores[1]) {
+    int score_0 =  GameBoard_score_of(board, 0);
+    int score_1 =  GameBoard_score_of(board, 1);
+
+    if (score_0 > score_1) {
         // Player 0 won.
         return 0;
     }
 
-    if (board->stores[0] == board->stores[1]) {
+    if (score_0 == score_1) {
         // Tie.
         return -1;
     }
 
     // Player 1 won.
     return 1;
+
+}
+
+int GameBoard_score_of(GameBoard *board, int player) {
+
+    int score = board->stores[player];
+    for (int i = 0; i < board->length; i++) {
+        score += board->lanes[player][i];
+    }
+
+    return score;
 
 }
 
