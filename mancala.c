@@ -84,7 +84,19 @@ void GameBoard_print(GameBoard *board) {
     printf(" + 1");
 
     if (GameBoard_is_game_over(board)) {
-        printf("\t%d won.\n", GameBoard_winner_is(board));
+
+        int winner = GameBoard_winner_is(board);
+
+        if (winner == -1) {
+
+            printf("\t Tie.\n");
+
+        } else {
+
+            printf("\t%d won.\n", winner);
+
+        }
+
     } else {
         printf("\t%d to play.\n", board->turn);
     }
