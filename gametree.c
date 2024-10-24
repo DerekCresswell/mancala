@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <time.h>
 
 void Node_cleanup(Node *node, void (*free_state) (void *state)) {
 
@@ -20,7 +22,13 @@ void Node_cleanup(Node *node, void (*free_state) (void *state)) {
 }
 
 void MinMaxSearch_print_stats(MinMaxSearch *search) {
-    printf("Nodes generated: %d\tNodes explored: %d\n", search->nodes_generated, search->nodes_explored);
+    printf(
+        "%d Nodes generated and %d explored in %dms and %dus.\n",
+        search->nodes_generated,
+        search->nodes_explored,
+        search->elapsed_time_ms,
+        search->elapsed_time_us
+    );
 }
 
 int _max(int a, int b) {
@@ -79,6 +87,9 @@ int _MinMaxSearch_search_inner(MinMaxSearch *search, Node *root, int max_player,
 
 Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
 
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start_time);
+
     // We must generate the successors of the root node and run our search on it.
     // This assumes we are not at a terminal node.
     int number_successors = MinMaxSearch_generate_successor_nodes(search, root);
@@ -98,6 +109,15 @@ Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
         }
 
     }
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end_time);
+
+    long difference_s = end_time.tv_sec - start_time.tv_sec;
+    long difference_ns = end_time.tv_nsec - start_time.tv_nsec;
+
+    search->elapsed_time_ms = difference_s * 1000 + (difference_ns / 1000000);
+    search->elapsed_time_us = difference_s * 1000000 + (difference_ns / 1000);
+    search->elapsed_time_us -= search->elapsed_time_ms * 1000;
 
     return root->successors + index_of_highest_utility;
 
@@ -134,5 +154,7 @@ void MinMaxSearch_reset_stats(MinMaxSearch *search) {
 
     search->nodes_generated = 0;
     search->nodes_explored = 0;
+    search->elapsed_time_ms = 0;
+    search->elapsed_time_us = 0;
 
 }

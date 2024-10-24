@@ -26,9 +26,16 @@ typedef struct {
     // Stats.
     int nodes_generated;
     int nodes_explored;
+    int elapsed_time_ms;
+    int elapsed_time_us;
 
 } MinMaxSearch;
 
+/**
+ * Prints the statistics from the last search.
+ *
+ * Be sure to clear the stats using _reset_stats before running a new search.
+ */
 void MinMaxSearch_print_stats(MinMaxSearch *search);
 
 /**
