@@ -28,7 +28,10 @@ GameBoard *GameBoard_create(int length, int starting_seeds) {
     board->stores[0] = 0;
     board->stores[1] = 0;
 
-    board-> turn = 0;
+    board->turn = 0;
+
+    board->play_made.pit_played = -1;
+    board->play_made.turn = -1;
 
     return board;
 
@@ -52,6 +55,10 @@ GameBoard *GameBoard_copy(GameBoard *board) {
         new_board->lanes[1][i] = board->lanes[1][i];
 
     }
+
+    // Copy the play made.
+    new_board->play_made.pit_played = board->play_made.pit_played;
+    new_board->play_made.turn = board->play_made.turn;
 
     return new_board;
 
@@ -109,6 +116,10 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
     // Constraints:
     //  * pit_to_play < board->length
     //  * board->lane_(board->turn) > 0
+
+    // Record this play.
+    board->play_made.pit_played = pit_to_play;
+    board->play_made.turn = board->turn;
 
     int starting_turn = board->turn;
 

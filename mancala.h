@@ -7,6 +7,11 @@ typedef struct {
 
     int turn; // 0 or 1 for the next player to play.
 
+    struct {
+        int pit_played;
+        int turn;
+    } play_made;
+
 } GameBoard;
 
 /**
