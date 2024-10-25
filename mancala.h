@@ -81,7 +81,7 @@ int GameBoard_get_successors(GameBoard *board, GameBoard ***successors);
 /**
  * Returns the utility for the current player.
  */
-int GameBoard_utility(GameBoard *board);
+int GameBoard_utility(GameBoard *board, int for_player);
 
 /**
  * Returns the current player;

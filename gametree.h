@@ -17,7 +17,7 @@ typedef struct {
 
     int depth;
 
-    int (*utility) (void *state);
+    int (*utility) (void *state, int for_player);
     int (*is_terminal) (void *state);
     int (*get_turn) (void *state);
     int (*get_successors) (void *state, void ***successors);

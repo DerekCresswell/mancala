@@ -1,5 +1,6 @@
 #include "mancala.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -274,19 +275,28 @@ int GameBoard_get_successors(GameBoard *board, GameBoard ***successors) {
 
 }
 
-int GameBoard_utility(GameBoard *board) {
+int GameBoard_utility(GameBoard *board, int for_player) {
 
+    // If the game is over, this is the best (or worst) possible move.
     if (GameBoard_is_game_over(board)) {
 
         int winner = GameBoard_winner_is(board);
 
-        // TODO: Return a gaurenteed win.
-        return (winner == board->turn) * 1000;
+        // Tie.
+        if (winner == -1) {
+            return 0;
+        }
 
+        if (winner == for_player) {
+            return INT_MAX;
+        }
+
+        // Loser.
+        return INT_MIN;
     }
 
     // Return the advantage we hold in terms of score.
-    return board->stores[board->turn] - board->stores[(board->turn + 1) % 2];
+    return board->stores[for_player] - board->stores[(for_player + 1) % 2];
 
 }
 

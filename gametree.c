@@ -57,7 +57,7 @@ int _MinMaxSearch_search_inner(MinMaxSearch *search, Node *root, int max_player,
     int at_depth = depth <= 0;
     int is_terminal = search->is_terminal(root->game_state);
     if (at_depth || is_terminal) {
-        return search->utility(root->game_state);
+        return search->utility(root->game_state, max_player);
     }
 
     // Generate the successors of this node.
@@ -118,6 +118,7 @@ Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
     search->elapsed_time_ms = difference_s * 1000 + (difference_ns / 1000000);
     search->elapsed_time_us = difference_s * 1000000 + (difference_ns / 1000);
     search->elapsed_time_us -= search->elapsed_time_ms * 1000;
+    // FIX: us came out negative?
 
     return root->successors + index_of_highest_utility;
 
