@@ -24,10 +24,10 @@ void Node_cleanup(Node *node, void (*free_state) (void *state)) {
 void MinMaxSearch_print_stats(MinMaxSearch *search) {
     printf(
         "%d Nodes generated and %d explored in %dms and %dus.\n",
-        search->nodes_generated,
-        search->nodes_explored,
-        search->elapsed_time_ms,
-        search->elapsed_time_us
+        search->stats.nodes_generated,
+        search->stats.nodes_explored,
+        search->stats.elapsed_time_ms,
+        search->stats.elapsed_time_us
     );
 }
 
@@ -51,7 +51,7 @@ int _min(int a, int b) {
 int _MinMaxSearch_search_inner(MinMaxSearch *search, Node *root, int max_player, int depth) {
 
     // We are exploring a new node.
-    search->nodes_explored++;
+    search->stats.nodes_explored++;
 
     // Check if our node is at depth or terminal.
     int at_depth = depth <= 0;
@@ -76,7 +76,9 @@ int _MinMaxSearch_search_inner(MinMaxSearch *search, Node *root, int max_player,
     int best_utility = 0;
     for (int i = 0; i < number_successors; i++) {
 
-        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, depth - 1);
+        int next_depth = depth - 1;
+
+        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, next_depth);
         best_utility = eval_function(best_utility, utility);
 
     }
@@ -96,12 +98,16 @@ Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
 
     int max_player = search->get_turn(root->game_state);
 
+    search->depth = search->options.max_depth;
+
     // Return the node that had the highest utility.
     int index_of_highest_utility = 0;
     int highest_utility = -1;
     for (int i = 0; i < number_successors; i++) {
 
-        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, search->depth - 1);
+        int next_depth = search->depth - 1;
+
+        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, next_depth);
 
         if (utility > highest_utility) {
             highest_utility = utility;
@@ -115,10 +121,14 @@ Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
     long difference_s = end_time.tv_sec - start_time.tv_sec;
     long difference_ns = end_time.tv_nsec - start_time.tv_nsec;
 
-    search->elapsed_time_ms = difference_s * 1000 + (difference_ns / 1000000);
-    search->elapsed_time_us = difference_s * 1000000 + (difference_ns / 1000);
-    search->elapsed_time_us -= search->elapsed_time_ms * 1000;
-    // FIX: us came out negative?
+    if (difference_ns < 0) {
+        difference_s -= 1;
+        difference_ns += 1000000000;
+    }
+
+    search->stats.elapsed_time_ms = difference_s * 1000 + (difference_ns / 1000000);
+    search->stats.elapsed_time_us = difference_s * 1000000 + (difference_ns / 1000);
+    search->stats.elapsed_time_us -= search->stats.elapsed_time_ms * 1000;
 
     return root->successors + index_of_highest_utility;
 
@@ -142,7 +152,7 @@ int MinMaxSearch_generate_successor_nodes(MinMaxSearch *search, Node *root) {
     }
 
     // We have generated more nodes.
-    search->nodes_generated += number_successors;
+    search->stats.nodes_generated += number_successors;
 
     // Free the successors list as we now have the pointers to the game states saved.
     free(successors);
@@ -153,9 +163,9 @@ int MinMaxSearch_generate_successor_nodes(MinMaxSearch *search, Node *root) {
 
 void MinMaxSearch_reset_stats(MinMaxSearch *search) {
 
-    search->nodes_generated = 0;
-    search->nodes_explored = 0;
-    search->elapsed_time_ms = 0;
-    search->elapsed_time_us = 0;
+    search->stats.nodes_generated = 0;
+    search->stats.nodes_explored = 0;
+    search->stats.elapsed_time_ms = 0;
+    search->stats.elapsed_time_us = 0;
 
 }

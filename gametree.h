@@ -15,8 +15,30 @@ void Node_cleanup(Node *node, void (*free_state) (void *state));
 
 typedef struct {
 
+    // Search options.
+    // ---------------
+    struct {
+
+        // Absolute maximum depth to search.
+        int max_depth;
+
+        // Enables and modifies iterative deepening.
+        int iterative_deepening;
+        int starting_depth;
+        int depth_step;
+
+        // Enables reuse of generated gametrees.
+        int clear_successors;
+
+        // Enables pruning techniques.
+        int dead_state_pruning;
+        int alpha_beta_pruning;
+
+    } options;
+
     int depth;
 
+    // Game functions.
     int (*utility) (void *state, int for_player);
     int (*is_terminal) (void *state);
     int (*get_turn) (void *state);
@@ -24,10 +46,12 @@ typedef struct {
     void (*free_state) (void *state);
 
     // Stats.
-    int nodes_generated;
-    int nodes_explored;
-    int elapsed_time_ms;
-    int elapsed_time_us;
+    struct {
+        int nodes_generated;
+        int nodes_explored;
+        int elapsed_time_ms;
+        int elapsed_time_us;
+    } stats;
 
 } MinMaxSearch;
 
