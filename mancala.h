@@ -10,6 +10,8 @@ typedef struct {
     struct {
         int pit_played;
         int turn;
+        int was_capture;
+        int was_chain;
     } play_made;
 
 } GameBoard;

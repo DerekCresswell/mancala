@@ -5,8 +5,8 @@ DEPS = mancala.h
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-mancala: mancala.o main.o
-	$(CC) -o mancala mancala.o main.o
+mancala: mancala.o main.o gametree.o
+	$(CC) -o mancala mancala.o main.o gametree.o
 
 .PHONY: clean
 

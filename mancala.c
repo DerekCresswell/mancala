@@ -32,6 +32,8 @@ GameBoard *GameBoard_create(int length, int starting_seeds) {
 
     board->play_made.pit_played = -1;
     board->play_made.turn = -1;
+    board->play_made.was_capture = -1;
+    board->play_made.was_chain = -1;
 
     return board;
 
@@ -57,8 +59,7 @@ GameBoard *GameBoard_copy(GameBoard *board) {
     }
 
     // Copy the play made.
-    new_board->play_made.pit_played = board->play_made.pit_played;
-    new_board->play_made.turn = board->play_made.turn;
+    new_board->play_made = board->play_made;
 
     return new_board;
 
@@ -73,6 +74,15 @@ void GameBoard_delete(GameBoard *board) {
 }
 
 void GameBoard_print(GameBoard *board) {
+
+    // Print the previous turn.
+    if (board->play_made.was_capture == 1) {
+        printf("Player %d captured a piece!\n", board->play_made.turn);
+    }
+
+    if (board->play_made.was_chain == 1) {
+        printf("Player %d gets to play again!\n", board->play_made.turn);
+    }
 
     // Print first lane.
     printf("0 + %d", board->lanes[0][0]);
@@ -120,6 +130,8 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
     // Record this play.
     board->play_made.pit_played = pit_to_play;
     board->play_made.turn = board->turn;
+    board->play_made.was_capture = 0;
+    board->play_made.was_chain = 0;
 
     int starting_turn = board->turn;
 
@@ -163,6 +175,7 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
     // Check for end-of-turn conditions.
     if (current_turn != starting_turn && pit_to_play == 0) {
         // Ended in own store. The player takes another turn.
+        board->play_made.was_chain = 1;
     } else {
         board->turn = (board->turn + 1) % 2;
     }
@@ -180,6 +193,8 @@ int GameBoard_play_turn(GameBoard *board, int pit_to_play) {
             board->lanes[opponents_turn][adjacent_pit_index] = 0;
             playing_lane[landed_in_pit_index] = 0;
             (*playing_store) += adjacent_pit + 1;
+
+            board->play_made.was_capture = 1;
 
         }
 
@@ -306,8 +321,10 @@ int GameBoard_utility(GameBoard *board, int for_player) {
         return INT_MIN;
     }
 
-    // Return the advantage we hold in terms of score.
-    return board->stores[for_player] - board->stores[(for_player + 1) % 2];
+    // We will calculate many different heuristics and take a weighted sum of them.
+    int score_advantage = board->stores[for_player] - board->stores[(for_player + 1) % 2];
+
+    return score_advantage;
 
 }
 
