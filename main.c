@@ -51,6 +51,27 @@ int last_player(GameBoard *board) {
 
 }
 
+int random_player(GameBoard *board) {
+
+    // Find all valid plays
+    int all_plays[board->length];
+    memset(all_plays, 0, board->length * sizeof(int));
+
+    int valid_plays = 0;
+    for (int i = 0; i < board->length; i++) {
+
+        if (board->lanes[board->turn] > 0) {
+            all_plays[valid_plays] = i;
+            valid_plays++;
+        }
+
+    }
+
+    int to_play = random() % valid_plays;
+    return all_plays[to_play];
+
+}
+
 int minmax_player(GameBoard *board) {
 
     // Initialize our search tree;
@@ -106,6 +127,7 @@ void run_console_game(int board_length, int starting_seeds, player_function play
             pit_to_play = player_1(board);
         }
 
+        printf("\n");
         GameBoard_play_turn(board, pit_to_play);
 
         GameBoard_print(board);
@@ -130,7 +152,10 @@ int main(int argc, char** argv) {
     int board_length = 6;
     int starting_seeds = 3;
 
-    run_console_game(board_length, starting_seeds, &human_player, &minmax_player);
+    run_console_game(board_length, starting_seeds, &human_player, &random_player);
+    // run_console_game(board_length, starting_seeds, &human_player, &minmax_player);
+    // run_console_game(board_length, starting_seeds, &first_player, &minmax_player);
+    // run_console_game(board_length, starting_seeds, &last_player, &minmax_player);
 
     return 0;
 

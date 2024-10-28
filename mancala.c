@@ -76,13 +76,19 @@ void GameBoard_delete(GameBoard *board) {
 void GameBoard_print(GameBoard *board) {
 
     // Print the previous turn.
+    if (board->play_made.turn != -1) {
+        printf("Player %d played pit %d", board->play_made.turn, board->play_made.pit_played);
+    }
+
     if (board->play_made.was_capture == 1) {
-        printf("Player %d captured a piece!\n", board->play_made.turn);
+        printf(" and captured a piece!");
     }
 
     if (board->play_made.was_chain == 1) {
-        printf("Player %d gets to play again!\n", board->play_made.turn);
+        printf(" and gets to play again!");
     }
+
+    printf("\n");
 
     // Print first lane.
     printf("0 + %d", board->lanes[0][0]);
