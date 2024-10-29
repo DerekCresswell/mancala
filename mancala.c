@@ -337,3 +337,16 @@ int GameBoard_utility(GameBoard *board, int for_player) {
 int GameBoard_current_turn(GameBoard *board) {
     return board->turn;
 }
+
+int GameBoard_is_dead_state(GameBoard *board, int for_player) {
+
+    int seeds_left = 0;
+    for (int i = 0; i < board->length; i++) {
+        seeds_left += board->lanes[0][i];
+        seeds_left += board->lanes[1][i];
+    }
+
+    int possible_score = board->stores[for_player] + seeds_left;
+    return possible_score < board->stores[(for_player + 1) % 2];
+
+}

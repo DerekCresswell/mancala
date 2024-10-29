@@ -26,9 +26,7 @@ typedef struct {
         int iterative_deepening;
         int starting_depth;
         int depth_step;
-
-        // Enables reuse of generated gametrees.
-        int clear_successors;
+        int time_limit_in_ms; // If negative, there is no limit.
 
         // Enables pruning techniques.
         int dead_state_pruning;
@@ -44,6 +42,7 @@ typedef struct {
     int (*get_turn) (void *state);
     int (*get_successors) (void *state, void ***successors);
     void (*free_state) (void *state);
+    int (*is_dead_state) (void *state, int for_player);
 
     // Stats.
     struct {

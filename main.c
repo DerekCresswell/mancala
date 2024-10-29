@@ -88,6 +88,7 @@ int minmax_player(GameBoard *board) {
 
     Node root;
     root.game_state = board;
+    root.number_successors = -1;
 
     Node *to_play = MinMaxSearch_search(&search, &root);
     MinMaxSearch_print_stats(&search);

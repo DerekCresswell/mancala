@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
+#include <limits.h>
 
 void Node_cleanup(Node *node, void (*free_state) (void *state)) {
 
@@ -45,40 +46,72 @@ int _min(int a, int b) {
     return b;
 }
 
+int _time_left(struct timespec start_time, int allowed_ms) {
+
+    struct timespec end_time;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end_time);
+    long ms_elapsed = 1000 * (end_time.tv_sec - start_time.tv_sec);
+    long ns_elapsed = end_time.tv_nsec - start_time.tv_nsec;
+
+    if (ns_elapsed < 0) {
+        ms_elapsed -= 1000;
+    }
+
+    return allowed_ms - ms_elapsed;
+
+}
+
 /**
  * The inner search function which returns utility values instead of nodes.
  */
-int _MinMaxSearch_search_inner(MinMaxSearch *search, Node *root, int max_player, int depth) {
+int _MinMaxSearch_search_inner(MinMaxSearch *search, Node *root, int max_player, int depth, struct timespec start_time) {
 
     // We are exploring a new node.
     search->stats.nodes_explored++;
 
-    // Check if our node is at depth or terminal.
+    // Check if our node is at depth, terminal, or we are out of time.
     int at_depth = depth <= 0;
     int is_terminal = search->is_terminal(root->game_state);
-    if (at_depth || is_terminal) {
+    int is_time_left = _time_left(start_time, search->options.time_limit_in_ms) > 0;
+    if (at_depth || is_terminal || !is_time_left) {
         return search->utility(root->game_state, max_player);
+    }
+
+    int is_max = max_player == search->get_turn(root->game_state);
+
+    // Check if this is a dead state.
+    if (search->options.dead_state_pruning) {
+
+        int is_dead = search->is_dead_state(root->game_state, search->get_turn(root->game_state));
+        if (is_dead && is_max) {
+            return INT_MIN;
+        }
+        if (is_dead) {
+            return INT_MAX;
+        }
+
     }
 
     // Generate the successors of this node.
     int number_successors = MinMaxSearch_generate_successor_nodes(search, root);
 
     // Now, we may explore the successor nodes.
-    int is_max = max_player == search->get_turn(root->game_state);
     int (*eval_function)(int, int);
 
+    int best_utility;
     if (is_max) {
         eval_function = &_max;
+        best_utility = INT_MIN;
     } else {
         eval_function = &_min;
+        best_utility = INT_MAX;
     }
 
-    int best_utility = 0;
     for (int i = 0; i < number_successors; i++) {
 
         int next_depth = depth - 1;
 
-        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, next_depth);
+        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, next_depth, start_time);
         best_utility = eval_function(best_utility, utility);
 
     }
@@ -98,26 +131,47 @@ Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
 
     int max_player = search->get_turn(root->game_state);
 
-    search->depth = search->options.max_depth;
+    int max_depth = search->options.max_depth;
 
-    // Return the node that had the highest utility.
+    // Perform iterative deepening if required.
+    // These are sane defaults that will perform a single max depth search.
+    int starting_depth = max_depth;
+    int depth_step = 1;
+    if (search->options.iterative_deepening) {
+        starting_depth = search->options.starting_depth;
+        depth_step = search->options.depth_step;
+    }
+
     int index_of_highest_utility = 0;
-    int highest_utility = -1;
-    for (int i = 0; i < number_successors; i++) {
+    int highest_utility = INT_MIN;
+    for (int current_search_depth = starting_depth; current_search_depth <= max_depth; current_search_depth += depth_step) {
 
-        int next_depth = search->depth - 1;
+        search->depth = current_search_depth;
 
-        int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, next_depth);
+        // Return the node that had the highest utility.
+        int is_time_left = 1;
+        for (int i = 0; i < number_successors; i++) {
 
-        if (utility > highest_utility) {
-            highest_utility = utility;
-            index_of_highest_utility = i;
+            int next_depth = search->depth - 1;
+
+            int utility = _MinMaxSearch_search_inner(search, root->successors + i, max_player, next_depth, start_time);
+
+            if (utility > highest_utility) {
+                highest_utility = utility;
+                index_of_highest_utility = i;
+            }
+
+        }
+
+        if (!is_time_left) {
+            break;
         }
 
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &end_time);
 
+    // Calculate the time taken.
     long difference_s = end_time.tv_sec - start_time.tv_sec;
     long difference_ns = end_time.tv_nsec - start_time.tv_nsec;
 
@@ -130,11 +184,17 @@ Node *MinMaxSearch_search(MinMaxSearch *search, Node *root) {
     search->stats.elapsed_time_us = difference_s * 1000000 + (difference_ns / 1000);
     search->stats.elapsed_time_us -= search->stats.elapsed_time_ms * 1000;
 
+    // Return the best successor node.
     return root->successors + index_of_highest_utility;
 
 }
 
 int MinMaxSearch_generate_successor_nodes(MinMaxSearch *search, Node *root) {
+
+    // Only generate nodes if we need to.
+    if (root->number_successors >= 0) {
+        return root->number_successors;
+    }
 
     void **successors;
     int number_successors = search->get_successors(root->game_state, &successors);

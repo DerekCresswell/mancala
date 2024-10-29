@@ -94,3 +94,12 @@ int GameBoard_utility(GameBoard *board, int for_player);
  * Returns the current player;
  */
 int GameBoard_current_turn(GameBoard *board);
+
+/**
+ * Returns if the current state is a dead state for the given player.
+ *
+ * A dead state is one in which it is impossible for the given player to win.
+ * If this returns true, the given player cannot win.
+ * However, if this returns false, it does not mean that the given player can win.
+ */
+int GameBoard_is_dead_state(GameBoard *board, int for_player);
