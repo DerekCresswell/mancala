@@ -106,6 +106,10 @@ int minmax_player(GameBoard *board) {
 
 void run_console_game(int board_length, int starting_seeds, player_function player_0, player_function player_1) {
 
+    #ifdef ARENA
+        arena_setup();
+    #endif
+
     // Initialize a game of mancala.
     GameBoard *board = GameBoard_create(board_length, starting_seeds);
     if (board == NULL) {
@@ -146,6 +150,10 @@ void run_console_game(int board_length, int starting_seeds, player_function play
     // Clean up and exit.
     GameBoard_delete(board);
 
+    #ifdef ARENA
+        arena_teardown();
+    #endif
+
 }
 
 int main(int argc, char** argv) {
@@ -153,7 +161,8 @@ int main(int argc, char** argv) {
     int board_length = 6;
     int starting_seeds = 3;
 
-    run_console_game(board_length, starting_seeds, &human_player, &random_player);
+    // run_console_game(board_length, starting_seeds, &human_player, &random_player);
+    run_console_game(board_length, starting_seeds, &minmax_player, &random_player);
     // run_console_game(board_length, starting_seeds, &human_player, &minmax_player);
     // run_console_game(board_length, starting_seeds, &first_player, &minmax_player);
     // run_console_game(board_length, starting_seeds, &last_player, &minmax_player);

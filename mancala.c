@@ -4,9 +4,47 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef ARENA
+    #include "arena.h"
+    Arena *arena;
+
+    void arena_setup() {
+
+        arena = Arena_create(sizeof(GameBoard), 10000);
+
+    }
+
+    void arena_teardown() {
+
+        Arena_delete(arena);
+
+    }
+
+#endif
+
+// Provides an arena allocator for gameboards.
+static inline GameBoard *_GameBoard_malloc() {
+
+#ifdef ARENA
+    return Arena_allocate(arena);
+#else
+    return malloc(sizeof(GameBoard));
+#endif
+
+}
+
+static inline void _GameBoard_free(GameBoard *board) {
+
+#ifdef ARENA
+#else
+    return free(board);
+#endif
+
+}
+
 GameBoard *GameBoard_create(int length, int starting_seeds) {
 
-    GameBoard *board = malloc(sizeof(GameBoard));
+    GameBoard *board = _GameBoard_malloc();
 
     if (board == NULL) {
         printf("Failed to allocate game board.\n");
@@ -69,7 +107,8 @@ void GameBoard_delete(GameBoard *board) {
 
     free(board->lanes[0]);
     free(board->lanes[1]);
-    free(board);
+
+    _GameBoard_free(board);
 
 }
 

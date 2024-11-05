@@ -16,6 +16,11 @@ typedef struct {
 
 } GameBoard;
 
+#ifdef ARENA
+    void arena_setup();
+    void arena_teardown();
+#endif
+
 /**
  * Allocates and deallocates resources for a game of Mancala.
  */
